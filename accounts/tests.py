@@ -5,10 +5,10 @@ from .models import User
 
 
 class TestSignUpView(TestCase):
-    url = reverse("accounts:signup")
+    def setUp(self):
+        self.url = reverse("accounts:signup")
 
     def test_success_get(self):
-        self.url = reverse("accounts:signup")
         response = self.client.get(self.url)
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, "accounts/sign_up.html")
@@ -133,13 +133,6 @@ class TestSignUpView(TestCase):
         self.assertFalse(User.objects.exists())
 
     def test_failure_post_with_duplicated_user(self):
-        data = {
-            "username": "testuser",
-            "email": "testmail@email.com",
-            "password1": "testpassword",
-            "password2": "testpassword",
-        }
-
         duplicated_data = {
             "username": "testuser",
             "email": "testmail@email.com",
@@ -147,7 +140,9 @@ class TestSignUpView(TestCase):
             "password2": "testpassword",
         }
 
-        self.client.post(self.url, data)
+        User.objects.create(
+            username="testuser", email="testemail@email.com", password="testpassword"
+        )
         response = self.client.post(self.url, duplicated_data)
         self.assertEquals(response.status_code, 200)
         self.assertFormError(
