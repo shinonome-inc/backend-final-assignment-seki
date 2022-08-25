@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 
 
-{% block title %}ようこそ！{% endblock title %}
+
+{% block title %}プロフィール{% endblock title %}
+
 
 
 {% block content %}
     <div class="d-flex justify-content-center">
-        <h1>Backend Final Assignment</h1>
-    </div>
+        {{ user.get_username }}
 {% endblock content %}

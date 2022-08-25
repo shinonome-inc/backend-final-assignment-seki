@@ -14,10 +14,20 @@
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
-                <h3><a class="nav-link" href="#">Twitter Clone</a></h3>
+
+                {% if user.is_authenticated %}
+                <h3><a class="nav-link" href="{% url 'tweets:home' %}">Twitter Clone</a></h3>
+                {% else %}
+                <h3><a class="nav-link" href="{% url 'welcome:index' %}">Twitter Clone</a></h3>
+                {% endif %}
                 <div class="d-flex">
-                    <p class="nav-link"><a href="#">ログイン</a></p>
-                    <p><a href="{% url 'accounts:signup' %}"><button type="button" class="btn btn-outline-primary">登録</button></a></p>
+                    {% if user.is_authenticated %}
+                    <p class="nav-link"><a href="{% url 'accounts:logout' %}"><button type="button" class="btn btn-outline-primary">ログアウト</button></a></p>
+                    <p class="nav-link"><a href="{% url 'accounts:user_profile' user.username %}"><button type="button" class="btn btn-outline-primary">{{ user.get_username }}</button></a></p>
+                    {% else %}
+                    <p class="nav-link"><a href="{% url 'accounts:login' %}"><button type="button" class="btn btn-outline-primary">ログイン</button></a></p>
+                    <p class="nav-link"><a href="{% url 'accounts:signup' %}"><button type="button" class="btn btn-outline-primary">登録</button></a></p>
+                    {% endif %}
                 </div>
             </div>
         </nav>
