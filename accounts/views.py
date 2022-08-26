@@ -1,6 +1,6 @@
 from django.views.generic import CreateView, TemplateView
 from django.urls import reverse_lazy
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import SignUpForm
@@ -15,7 +15,9 @@ class SignUpView(CreateView):
 
     def form_valid(self, form):
         result = super().form_valid(form)
-        user = self.object
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password1')
+        user = authenticate(username=username, password=password)
         login(self.request, user)
         return result
 
