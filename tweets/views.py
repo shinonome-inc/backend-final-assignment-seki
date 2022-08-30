@@ -1,14 +1,21 @@
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 
-from tweets.forms import TweetForm
+from .forms import TweetForm
+from .models import Tweet
 
 # Create your views here.
 
 
-class HomeView(LoginRequiredMixin, TemplateView):
+class HomeView(LoginRequiredMixin, ListView):
+    model = Tweet
     template_name = "tweets/home.html"
+    context_object_name = "tweets"
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return Tweet.objects.select_related("user")
 
 
 class TweetCreateView(LoginRequiredMixin, CreateView):

@@ -32,15 +32,18 @@
             </div>
         </nav>
         <br>
-        <div class="mx-5">
-            {% if user.is_authenticated %}
-            <nav class="nav flex-column">
-                <a href="{% url 'tweets:create' %}"><button type="button" class="btn btn-primary btn-lg">ツイートする</button></a>
-            </nav>
-            {% endif %}
-            <br>
-            {% block content %}
-            {% endblock content %}
+        <div class="container">
+            <div class="row">
+                {% if user.is_authenticated %}
+                    <div class="col-2">
+                        <a href="{% url 'tweets:create' %}"><button type="button" class="btn btn-primary btn-lg">ツイートする</button></a>
+                    </div>
+                {% endif %}
+                <div class="col">
+                    {% block content %}
+                    {% endblock content %}
+                </div>
+            </div>
         </div>
     </body>
 
