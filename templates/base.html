@@ -36,7 +36,8 @@
             <div class="row">
                 {% if user.is_authenticated %}
                     <div class="col-2">
-                        <a href="{% url 'tweets:create' %}"><button type="button" class="btn btn-primary btn-lg">ツイートする</button></a>
+                            <a href="{% url 'tweets:home' %}"><button type="button" class="btn btn-outline-primary btn-lg w-100">ホーム</button></a>
+                            <a href="{% url 'tweets:create' %}"><button type="button" class="btn btn-primary btn-lg w-100">ツイートする</button></a>
                     </div>
                 {% endif %}
                 <div class="col">

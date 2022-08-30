@@ -1,5 +1,10 @@
-from django.views.generic import ListView, CreateView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import (
+    ListView,
+    CreateView,
+    DetailView,
+    DeleteView,
+)
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 
 from .forms import TweetForm
@@ -26,3 +31,18 @@ class TweetCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
+
+
+class TweetDetailView(LoginRequiredMixin, DetailView):
+    model = Tweet
+    template_name = "tweets/tweet_detail.html"
+
+
+class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Tweet
+    template_name = "tweets/tweet_delete.html"
+    success_url = reverse_lazy("tweets:home")
+
+    def test_func(self):
+        tweet = self.get_object()
+        return self.request.user == tweet.user

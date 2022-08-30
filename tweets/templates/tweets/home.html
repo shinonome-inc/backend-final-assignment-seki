@@ -13,7 +13,7 @@
             </div>
             <div class="card-footer text-muted">
                 {{ tweet.created_at }}
-                <span><a href="#">詳細</a></span>
+                <span><a href="{{ tweet.get_absolute_url }}">詳細</a></span>
             </div>
         </div>
         <br>

@@ -13,7 +13,9 @@
             </div>
             <div class="card-footer text-muted">
                 {{ my_tweet.created_at }}
+                <span><a href="{{ my_tweet.get_absolute_url }}">詳細</a></span>
             </div>
         </div>
+        <br>
 {% endfor %}
 {% endblock content %}
