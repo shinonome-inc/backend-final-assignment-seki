@@ -31,10 +31,17 @@
                 </div>
             </div>
         </nav>
-
-        {% block content %}
-        {% endblock content %}
-
+        <br>
+        <div class="mx-5">
+            {% if user.is_authenticated %}
+            <nav class="nav flex-column">
+                <a href="{% url 'tweets:create' %}"><button type="button" class="btn btn-primary btn-lg">ツイートする</button></a>
+            </nav>
+            {% endif %}
+            <br>
+            {% block content %}
+            {% endblock content %}
+        </div>
     </body>
 
 </html>
