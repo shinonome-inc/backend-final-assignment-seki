@@ -30,4 +30,4 @@ class UserProfileView(LoginRequiredMixin, ListView):
     context_object_name = "my_tweets"
 
     def get_queryset(self):
-        return Tweet.objects.filter(user=self.request.user)
+        return Tweet.objects.filter(user=self.request.user).order_by("-created_at")

@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth import SESSION_KEY
 
 from mysite import settings
+from tweets.models import Tweet
 from .models import User
 
 
@@ -331,8 +332,31 @@ class TestLogoutView(TestCase):
 
 
 class TestUserProfileView(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="testemail@email.com",
+            password="testpassword",
+        )
+        self.client.login(username="testuser", password="testpassword")
+        Tweet.objects.create(
+            user=self.user,
+            content="test_tweet1",
+        )
+        Tweet.objects.create(
+            user=self.user,
+            content="test_tweet2",
+        )
+
     def test_success_get(self):
-        pass
+        response = self.client.get(
+            reverse("accounts:user_profile", kwargs={"username": self.user.username})
+        )
+        self.assertTemplateUsed(response, "accounts/profile.html")
+        self.assertQuerysetEqual(
+            response.context["my_tweets"],
+            Tweet.objects.filter(user=self.user).order_by("-created_at"),
+        )
 
 
 class TestUserProfileEditView(TestCase):
