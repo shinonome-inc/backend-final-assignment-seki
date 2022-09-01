@@ -5,7 +5,17 @@
 
 
 {% block content %}
-    <div class="d-flex justify-content-center">
-        <h1>ホーム</h1>
-    </div>
+{% for tweet in tweets %}
+        <div class="card">
+            <b class="card-header">{{ tweet.user }}</b>
+            <div class="card-body">
+                <p class="card-text">{{ tweet.content }}</p>
+            </div>
+            <div class="card-footer text-muted">
+                {{ tweet.created_at }}
+                <span><a href="{{ tweet.get_absolute_url }}">詳細</a></span>
+            </div>
+        </div>
+        <br>
+{% endfor %}
 {% endblock content %}

@@ -5,6 +5,17 @@
 
 
 {% block content %}
-    <div class="d-flex justify-content-center">
-        {{ user.get_username }}
+{% for my_tweet in my_tweets %}
+        <div class="card">
+            <b class="card-header">{{ my_tweet.user }}</b>
+            <div class="card-body">
+                <p class="card-text">{{ my_tweet.content }}</p>
+            </div>
+            <div class="card-footer text-muted">
+                {{ my_tweet.created_at }}
+                <span><a href="{{ my_tweet.get_absolute_url }}">詳細</a></span>
+            </div>
+        </div>
+        <br>
+{% endfor %}
 {% endblock content %}
