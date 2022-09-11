@@ -5,15 +5,30 @@
 
 
 {% block content %}
-{% for my_tweet in my_tweets %}
+<h2>プロフィール</h2>
+<div class="card">
+    <div class="card-header">
+        {{ profile.user }}
+        <a href="#">プロフィール編集</a>
+    </div>
+    <div class="card-body">
+        <p class="card-text">誕生日:{{ profile.birth_date }}</p>
+        <p class="card-text">自己紹介:{{ profile.self_introduction}}</p>
+    </div>
+</div>
+<hr>
+<p><b>{{ profile.user }}のツイート</b></p>
+{% for tweet in tweets %}
         <div class="card">
-            <b class="card-header">{{ my_tweet.user }}</b>
+            <b class="card-header">{{ tweet.user }}</b>
             <div class="card-body">
-                <p class="card-text">{{ my_tweet.content }}</p>
+                <p class="card-text">{{ tweet.content }}</p>
             </div>
             <div class="card-footer text-muted">
-                {{ my_tweet.created_at }}
-                <span><a href="{{ my_tweet.get_absolute_url }}">詳細</a></span>
+                {{ tweet.created_at }}
+                {% if request.user == tweet.user %}
+                    <a href="{% url 'tweets:delete' tweet.pk %}"><button type="button" class="btn btn-danger">削除</button>
+                {% endif %}
             </div>
         </div>
         <br>

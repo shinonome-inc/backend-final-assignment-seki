@@ -1,10 +1,11 @@
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, DetailView
 from django.urls import reverse_lazy
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from tweets.models import Tweet
+from .models import Profile
 from .forms import SignUpForm
+from tweets.models import Tweet
 
 
 # Create your views here.
@@ -24,10 +25,17 @@ class SignUpView(CreateView):
         return result
 
 
-class UserProfileView(LoginRequiredMixin, ListView):
-    model = Tweet
+class UserProfileView(LoginRequiredMixin, DetailView):
+    model = Profile
     template_name = "accounts/profile.html"
-    context_object_name = "my_tweets"
+    context_object_name = "profile"
 
-    def get_queryset(self):
-        return Tweet.objects.filter(user=self.request.user).order_by("-created_at")
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        profile = Profile.objects.get(pk=self.kwargs["pk"])
+        context["tweets"] = (
+            Tweet.objects.select_related("user")
+            .filter(user=profile.user)
+            .order_by("-created_at")
+        )
+        return context
