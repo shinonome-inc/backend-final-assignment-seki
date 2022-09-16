@@ -5,6 +5,7 @@
 
 
 {% block content %}
+<h2>ホーム</h2>
 {% for tweet in tweets %}
         <div class="card">
             <b class="card-header"><a href="{% url 'accounts:user_profile' tweet.user.profile.pk %}">{{ tweet.user }}</a></b>

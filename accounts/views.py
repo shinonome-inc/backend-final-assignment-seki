@@ -1,9 +1,17 @@
-from django.views.generic import CreateView, DetailView
+from django.contrib import messages
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    TemplateView,
+    ListView,
+)
 from django.urls import reverse_lazy
+from django.http import Http404, HttpResponseRedirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render
 
-from .models import Profile
+from .models import User, FriendShip, Profile
 from .forms import SignUpForm
 from tweets.models import Tweet
 
@@ -36,6 +44,101 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         context["tweets"] = (
             Tweet.objects.select_related("user")
             .filter(user=profile.user)
+            .order_by("-created_at")
+        )
+        context["following_count"] = (
+            FriendShip.objects.select_related("followee", "follower")
+            .filter(follower=profile.user)
+            .count()
+        )
+        context["follower_count"] = (
+            FriendShip.objects.select_related("followee", "follower")
+            .filter(followee=profile.user)
+            .count()
+        )
+        context["connection_exists"] = (
+            FriendShip.objects.select_related("followee", "follower")
+            .filter(follower=self.request.user, followee=profile.user)
+            .exists()
+        )
+        return context
+
+
+class FollowView(LoginRequiredMixin, TemplateView):
+    model = FriendShip
+    template_name = "accounts/follow.html"
+
+    def post(self, request, *args, **kwargs):
+        try:
+            follower = self.request.user
+            followee = User.objects.get(username=self.kwargs["username"])
+        except User.DoesNotExist:
+            messages.warning(request, "指定されたユーザーは存在しません。")
+            raise Http404
+
+        if follower == followee:
+            messages.warning(request, "自分自身はフォローできません。")
+            return render(request, "accounts/follow.html")
+        elif FriendShip.objects.filter(follower=follower, followee=followee).exists():
+            messages.warning(request, f"あなたは{ followee.username }をすでにフォローしています。")
+            return render(request, "accounts/follow.html")
+        else:
+            FriendShip.objects.create(follower=follower, followee=followee)
+            return HttpResponseRedirect(reverse_lazy("tweets:home"))
+
+
+class UnFollowView(LoginRequiredMixin, TemplateView):
+    model = FriendShip
+    template_name = "accounts/unfollow.html"
+
+    def post(self, request, *args, **kwargs):
+        try:
+            follower = self.request.user
+            followee = User.objects.get(username=self.kwargs["username"])
+        except User.DoesNotExist:
+            messages.warning(request, "指定されたユーザーは存在しません。")
+            raise Http404
+
+        if follower == followee:
+            messages.warning(request, "自分自身のフォローを外すことはできません。")
+            return render(request, "accounts/unfollow.html")
+        elif FriendShip.objects.filter(follower=follower, followee=followee).exists():
+            FriendShip.objects.filter(follower=follower, followee=followee).delete()
+            return HttpResponseRedirect(reverse_lazy("tweets:home"))
+        else:
+            messages.warning(request, f"{followee.username}はフォローしていません")
+            return render(request, "accounts/unfollow.html")
+
+
+class FollowingListView(LoginRequiredMixin, ListView):
+    template_name = "accounts/following_list.html"
+    model = FriendShip
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        username = self.kwargs["username"]
+        follower = User.objects.get(username=username)
+        context["username"] = username
+        context["followings"] = (
+            FriendShip.objects.select_related("followee", "follower")
+            .filter(follower=follower)
+            .order_by("-created_at")
+        )
+        return context
+
+
+class FollowerListView(LoginRequiredMixin, ListView):
+    template_name = "accounts/follower_list.html"
+    model = FriendShip
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        username = self.kwargs["username"]
+        followee = User.objects.get(username=username)
+        context["username"] = username
+        context["followers"] = (
+            FriendShip.objects.select_related("followee", "follower")
+            .filter(followee=followee)
             .order_by("-created_at")
         )
         return context

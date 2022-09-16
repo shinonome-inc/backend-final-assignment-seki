@@ -25,5 +25,18 @@ class Profile(models.Model):
         return str(self.user)
 
 
-# class FriendShip(models.Model):
-#     pass
+class FriendShip(models.Model):
+    followee = models.ForeignKey(
+        User,
+        related_name="followee",
+        on_delete=models.CASCADE,
+    )
+    follower = models.ForeignKey(
+        User,
+        related_name="follower",
+        on_delete=models.CASCADE,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.follower.username} follows {self.followee.username}"

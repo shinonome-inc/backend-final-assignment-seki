@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+
+{% block title %}フォロー解除{% endblock title %}
+
+
+{% block content %}
+{% if messages %}
+	<ul class="messages_ul">
+		{% for message in messages %}
+			<li class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</li>
+		{% endfor %}
+	</ul>
+{% endif %}
+<div class="card">
+    <div class="card-body">
+        <p class="card-text">{{ username }}のフォローを解除しますか？</p>
+        <div class="d-flex justify-content-start">
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <a href="{{ request.META.HTTP_REFERER }}"><button type="button" class="btn btn-primary btn-lg">戻る</button></a>
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary btn-lg">フォロー解除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
