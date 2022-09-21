@@ -5,7 +5,7 @@ from django.views.generic import (
     TemplateView,
     ListView,
 )
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.http import Http404, HttpResponseRedirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -47,13 +47,11 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             .order_by("-created_at")
         )
         context["following_count"] = (
-            FriendShip.objects.select_related("followee", "follower")
-            .filter(follower=profile.user)
+            FriendShip.objects.filter(follower=profile.user)
             .count()
         )
         context["follower_count"] = (
-            FriendShip.objects.select_related("followee", "follower")
-            .filter(followee=profile.user)
+            FriendShip.objects.filter(followee=profile.user)
             .count()
         )
         context["connection_exists"] = (
@@ -69,8 +67,8 @@ class FollowView(LoginRequiredMixin, TemplateView):
     template_name = "accounts/follow.html"
 
     def post(self, request, *args, **kwargs):
+        follower = self.request.user
         try:
-            follower = self.request.user
             followee = User.objects.get(username=self.kwargs["username"])
         except User.DoesNotExist:
             messages.warning(request, "指定されたユーザーは存在しません。")
@@ -84,7 +82,7 @@ class FollowView(LoginRequiredMixin, TemplateView):
             return render(request, "accounts/follow.html")
         else:
             FriendShip.objects.create(follower=follower, followee=followee)
-            return HttpResponseRedirect(reverse_lazy("tweets:home"))
+            return HttpResponseRedirect(reverse("tweets:home"))
 
 
 class UnFollowView(LoginRequiredMixin, TemplateView):
@@ -92,8 +90,8 @@ class UnFollowView(LoginRequiredMixin, TemplateView):
     template_name = "accounts/unfollow.html"
 
     def post(self, request, *args, **kwargs):
+        follower = self.request.user
         try:
-            follower = self.request.user
             followee = User.objects.get(username=self.kwargs["username"])
         except User.DoesNotExist:
             messages.warning(request, "指定されたユーザーは存在しません。")
@@ -104,7 +102,7 @@ class UnFollowView(LoginRequiredMixin, TemplateView):
             return render(request, "accounts/unfollow.html")
         elif FriendShip.objects.filter(follower=follower, followee=followee).exists():
             FriendShip.objects.filter(follower=follower, followee=followee).delete()
-            return HttpResponseRedirect(reverse_lazy("tweets:home"))
+            return HttpResponseRedirect(reverse("tweets:home"))
         else:
             messages.warning(request, f"{followee.username}はフォローしていません")
             return render(request, "accounts/unfollow.html")
@@ -119,7 +117,7 @@ class FollowingListView(LoginRequiredMixin, ListView):
         username = self.kwargs["username"]
         follower = User.objects.get(username=username)
         context["username"] = username
-        context["followings"] = (
+        context["following_list"] = (
             FriendShip.objects.select_related("followee", "follower")
             .filter(follower=follower)
             .order_by("-created_at")
@@ -136,7 +134,7 @@ class FollowerListView(LoginRequiredMixin, ListView):
         username = self.kwargs["username"]
         followee = User.objects.get(username=username)
         context["username"] = username
-        context["followers"] = (
+        context["follower_list"] = (
             FriendShip.objects.select_related("followee", "follower")
             .filter(followee=followee)
             .order_by("-created_at")
