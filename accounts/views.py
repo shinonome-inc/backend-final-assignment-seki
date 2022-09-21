@@ -46,14 +46,12 @@ class UserProfileView(LoginRequiredMixin, DetailView):
             .filter(user=profile.user)
             .order_by("-created_at")
         )
-        context["following_count"] = (
-            FriendShip.objects.filter(follower=profile.user)
-            .count()
-        )
-        context["follower_count"] = (
-            FriendShip.objects.filter(followee=profile.user)
-            .count()
-        )
+        context["following_count"] = FriendShip.objects.filter(
+            follower=profile.user
+        ).count()
+        context["follower_count"] = FriendShip.objects.filter(
+            followee=profile.user
+        ).count()
         context["connection_exists"] = (
             FriendShip.objects.select_related("followee", "follower")
             .filter(follower=self.request.user, followee=profile.user)
@@ -82,6 +80,7 @@ class FollowView(LoginRequiredMixin, TemplateView):
             return render(request, "accounts/follow.html")
         else:
             FriendShip.objects.create(follower=follower, followee=followee)
+            messages.success(request, f"{ followee.username }をフォローしました。")
             return HttpResponseRedirect(reverse("tweets:home"))
 
 
@@ -102,6 +101,7 @@ class UnFollowView(LoginRequiredMixin, TemplateView):
             return render(request, "accounts/unfollow.html")
         elif FriendShip.objects.filter(follower=follower, followee=followee).exists():
             FriendShip.objects.filter(follower=follower, followee=followee).delete()
+            messages.success(request, f"{ followee.username }のフォローを解除しました。")
             return HttpResponseRedirect(reverse("tweets:home"))
         else:
             messages.warning(request, f"{followee.username}はフォローしていません")

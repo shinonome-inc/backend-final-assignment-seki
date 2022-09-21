@@ -8,14 +8,25 @@
 <h2>プロフィール</h2>
 <div class="card">
     <div class="card-header">
-        <b>{{ profile.user }}</b>
-        {% if request.user == profile.user %}
-            <a href="#">プロフィール編集</a>
-        {% elif connection_exists %}
-            <a href="{% url 'accounts:unfollow' profile.user.username %}" class="btn btn-secondary">フォロー解除</a>
-        {% else %}
-            <a href="{% url 'accounts:follow' profile.user.username %}" class="btn btn-info">フォロー</a>
-        {% endif %}
+            <div class="d-flex justify-content-center">
+                <b>{{ profile.user }}</b>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-center">
+                {% if request.user == profile.user %}
+                    <a href="#">プロフィール編集</a>
+                {% elif connection_exists %}
+                        <form method="POST" action="{% url 'accounts:unfollow' profile.user.username %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary">フォロー解除</button>
+                        </form>
+                {% else %}
+                    <form method="POST" action="{% url 'accounts:follow' profile.user.username %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-info">フォロー</button>
+                    </form>
+                {% endif %}
+            </div>
     </div>
     <div class="card-body">
         <p class="card-text">誕生日:{{ profile.birth_date }}</p>

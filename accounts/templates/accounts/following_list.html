@@ -6,7 +6,7 @@
 
 {% block content %}
 <h2>{{ username }}のフォロー一覧</h2>
-{% for following in followings %}
+{% for following in following_list %}
 <div class="card text-center">
     <div class="card-header">
         <b>{{ following.followee }}</b>

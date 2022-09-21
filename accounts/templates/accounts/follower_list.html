@@ -6,7 +6,7 @@
 
 {% block content %}
 <h2>{{ username }}のフォロワー一覧</h2>
-{% for follower in followers %}
+{% for follower in follower_list %}
 <div class="card text-center">
     <div class="card-header">
         <b>{{ follower.follower }}</b>
