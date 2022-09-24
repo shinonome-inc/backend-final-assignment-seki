@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.views.generic import (
     CreateView,
     DetailView,
-    TemplateView,
+    View,
     ListView,
 )
 from django.urls import reverse_lazy, reverse
@@ -11,7 +11,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 
-from .models import User, FriendShip, Profile
+from .models import User, FriendShip
 from .forms import SignUpForm
 from tweets.models import Tweet
 
@@ -34,36 +34,36 @@ class SignUpView(CreateView):
 
 
 class UserProfileView(LoginRequiredMixin, DetailView):
-    model = Profile
+    model = User
     template_name = "accounts/profile.html"
     context_object_name = "profile"
+    slug_field = "username"
+    slug_url_kwarg = "username"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        profile = Profile.objects.get(pk=self.kwargs["pk"])
         context["tweets"] = (
             Tweet.objects.select_related("user")
-            .filter(user=profile.user)
+            .filter(user__username=self.kwargs["username"])
             .order_by("-created_at")
         )
         context["following_count"] = FriendShip.objects.filter(
-            follower=profile.user
+            follower__username=self.kwargs["username"]
         ).count()
         context["follower_count"] = FriendShip.objects.filter(
-            followee=profile.user
+            followee__username=self.kwargs["username"]
         ).count()
         context["connection_exists"] = (
             FriendShip.objects.select_related("followee", "follower")
-            .filter(follower=self.request.user, followee=profile.user)
+            .filter(
+                follower=self.request.user, followee__username=self.kwargs["username"]
+            )
             .exists()
         )
         return context
 
 
-class FollowView(LoginRequiredMixin, TemplateView):
-    model = FriendShip
-    template_name = "accounts/follow.html"
-
+class FollowView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         follower = self.request.user
         try:
@@ -74,20 +74,17 @@ class FollowView(LoginRequiredMixin, TemplateView):
 
         if follower == followee:
             messages.warning(request, "自分自身はフォローできません。")
-            return render(request, "accounts/follow.html")
+            return render(request, "tweets/home.html")
         elif FriendShip.objects.filter(follower=follower, followee=followee).exists():
             messages.warning(request, f"あなたは{ followee.username }をすでにフォローしています。")
-            return render(request, "accounts/follow.html")
+            return render(request, "tweets/home.html")
         else:
             FriendShip.objects.create(follower=follower, followee=followee)
             messages.success(request, f"{ followee.username }をフォローしました。")
             return HttpResponseRedirect(reverse("tweets:home"))
 
 
-class UnFollowView(LoginRequiredMixin, TemplateView):
-    model = FriendShip
-    template_name = "accounts/unfollow.html"
-
+class UnFollowView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         follower = self.request.user
         try:
@@ -98,14 +95,14 @@ class UnFollowView(LoginRequiredMixin, TemplateView):
 
         if follower == followee:
             messages.warning(request, "自分自身のフォローを外すことはできません。")
-            return render(request, "accounts/unfollow.html")
+            return render(request, "tweets/home.html")
         elif FriendShip.objects.filter(follower=follower, followee=followee).exists():
             FriendShip.objects.filter(follower=follower, followee=followee).delete()
             messages.success(request, f"{ followee.username }のフォローを解除しました。")
             return HttpResponseRedirect(reverse("tweets:home"))
         else:
             messages.warning(request, f"{followee.username}はフォローしていません")
-            return render(request, "accounts/unfollow.html")
+            return render(request, "tweets/home.html")
 
 
 class FollowingListView(LoginRequiredMixin, ListView):
@@ -118,7 +115,7 @@ class FollowingListView(LoginRequiredMixin, ListView):
         follower = User.objects.get(username=username)
         context["username"] = username
         context["following_list"] = (
-            FriendShip.objects.select_related("followee", "follower")
+            FriendShip.objects.select_related("follower")
             .filter(follower=follower)
             .order_by("-created_at")
         )
@@ -135,7 +132,7 @@ class FollowerListView(LoginRequiredMixin, ListView):
         followee = User.objects.get(username=username)
         context["username"] = username
         context["follower_list"] = (
-            FriendShip.objects.select_related("followee", "follower")
+            FriendShip.objects.select_related("followee")
             .filter(followee=followee)
             .order_by("-created_at")
         )

@@ -12,7 +12,7 @@
         <b>{{ follower.follower }}</b>
     </div>
     <div class="card-body">
-        <a href="{% url 'accounts:user_profile' follower.follower.profile.pk %}"><button type="button" class="btn btn-outline-primary">プロフィールへ</button></a>
+        <a href="{% url 'accounts:user_profile' follower.follower.username %}"><button type="button" class="btn btn-outline-primary">プロフィールへ</button></a>
     </div>
 </div>
 <br>

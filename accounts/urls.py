@@ -12,7 +12,7 @@ urlpatterns = [
         name="login",
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-    path("<int:pk>/", views.UserProfileView.as_view(), name="user_profile"),
+    path("<slug:username>/", views.UserProfileView.as_view(), name="user_profile"),
     path("<str:username>/follow/", views.FollowView.as_view(), name="follow"),
     path("<str:username>/unfollow/", views.UnFollowView.as_view(), name="unfollow"),
     path(

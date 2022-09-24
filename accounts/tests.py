@@ -364,7 +364,7 @@ class TestUserProfileView(TestCase):
 
     def test_success_get(self):
         response = self.client.get(
-            reverse("accounts:user_profile", kwargs={"pk": self.user.pk})
+            reverse("accounts:user_profile", kwargs={"username": self.user.username})
         )
         self.assertTemplateUsed(response, "accounts/profile.html")
         self.assertQuerysetEqual(
