@@ -36,30 +36,23 @@ class SignUpView(CreateView):
 class UserProfileView(LoginRequiredMixin, DetailView):
     model = User
     template_name = "accounts/profile.html"
-    context_object_name = "profile"
+    context_object_name = "user"
     slug_field = "username"
     slug_url_kwarg = "username"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user = self.object
         context["tweets"] = (
             Tweet.objects.select_related("user")
-            .filter(user__username=self.kwargs["username"])
+            .filter(user=user)
             .order_by("-created_at")
         )
-        context["following_count"] = FriendShip.objects.filter(
-            follower__username=self.kwargs["username"]
-        ).count()
-        context["follower_count"] = FriendShip.objects.filter(
-            followee__username=self.kwargs["username"]
-        ).count()
-        context["connection_exists"] = (
-            FriendShip.objects.select_related("followee", "follower")
-            .filter(
-                follower=self.request.user, followee__username=self.kwargs["username"]
-            )
-            .exists()
-        )
+        context["following_count"] = FriendShip.objects.filter(follower=user).count()
+        context["follower_count"] = FriendShip.objects.filter(followee=user).count()
+        context["connection_exists"] = FriendShip.objects.filter(
+            follower=self.request.user, followee=user
+        ).exists()
         return context
 
 

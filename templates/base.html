@@ -21,7 +21,7 @@
                 <div class="d-flex">
                     {% if user.is_authenticated %}
                     <p class="nav-link"><a href="{% url 'accounts:logout' %}"><button type="button" class="btn btn-outline-primary">ログアウト</button></a></p>
-                    <p class="nav-link"><a href="{% url 'accounts:user_profile' user.username %}"><button type="button" class="btn btn-outline-primary">{{ user.get_username }}</button></a></p>
+                    <p class="nav-link"><a href="{% url 'accounts:user_profile' user.username %}"><button type="button" class="btn btn-outline-primary">{{ request.user }}</button></a></p>
                     {% else %}
                     <p class="nav-link"><a href="{% url 'accounts:login' %}"><button type="button" class="btn btn-outline-primary">ログイン</button></a></p>
                     <p class="nav-link"><a href="{% url 'accounts:signup' %}"><button type="button" class="btn btn-outline-primary">登録</button></a></p>
