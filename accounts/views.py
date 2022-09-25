@@ -1,20 +1,15 @@
 from django.contrib import messages
-from django.views.generic import (
-    CreateView,
-    DetailView,
-    View,
-    ListView,
-)
-from django.urls import reverse_lazy, reverse
-from django.http import Http404, HttpResponseRedirect
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse, reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView, View
 
-from .models import User, FriendShip
-from .forms import SignUpForm
 from tweets.models import Tweet
 
+from .forms import SignUpForm
+from .models import FriendShip, User
 
 # Create your views here.
 
@@ -105,7 +100,7 @@ class FollowingListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         username = self.kwargs["username"]
-        follower = User.objects.get(username=username)
+        follower = get_object_or_404(User, username=username)
         context["username"] = username
         context["following_list"] = (
             FriendShip.objects.select_related("follower")
@@ -122,7 +117,7 @@ class FollowerListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         username = self.kwargs["username"]
-        followee = User.objects.get(username=username)
+        followee = get_object_or_404(User, username=username)
         context["username"] = username
         context["follower_list"] = (
             FriendShip.objects.select_related("followee")
