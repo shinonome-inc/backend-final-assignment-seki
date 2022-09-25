@@ -1,6 +1,9 @@
 {
   // vscode
   "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
   "files.eol": "\n",
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
@@ -19,5 +22,9 @@
   "[python]": {
     "editor.tabSize": 4,
     "editor.defaultFormatter": "ms-python.python"
-  }
+  },
+  "cSpell.words": [
+    "followee",
+    "unfollow"
+  ]
 }

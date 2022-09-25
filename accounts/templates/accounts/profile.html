@@ -5,15 +5,51 @@
 
 
 {% block content %}
-{% for my_tweet in my_tweets %}
+<h2>プロフィール</h2>
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-center">
+            <b>{{ user.username }}</b>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-center">
+            {% if request.user == user %}
+                <a href="#">プロフィール編集</a>
+            {% elif connection_exists %}
+                <form method="POST" action="{% url 'accounts:unfollow' user.username %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">フォロー解除</button>
+                </form>
+            {% else %}
+                <form method="POST" action="{% url 'accounts:follow' user.username %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info">フォロー</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="card-text">誕生日:{{ user.birth_date }}</p>
+        <p class="card-text">自己紹介:{{ user.self_introduction }}</p>
+        <div class="d-flex flex-row">
+            <div class="p-2 bd-highlight"><p class="card-text">フォロー中: <a href="{% url 'accounts:following_list' user.username %}">{{ following_count }}</a></p></div>
+            <div class="p-2 bd-highlight"><p class="card-text">フォロワー: <a href="{% url 'accounts:follower_list' user.username %}">{{ follower_count }}</a></p></div>
+        </div>
+    </div>
+</div>
+<hr>
+<p><b>{{ user.username }}のツイート</b></p>
+{% for tweet in tweets %}
         <div class="card">
-            <b class="card-header">{{ my_tweet.user }}</b>
+            <b class="card-header">{{ tweet.user }}</b>
             <div class="card-body">
-                <p class="card-text">{{ my_tweet.content }}</p>
+                <p class="card-text">{{ tweet.content }}</p>
             </div>
             <div class="card-footer text-muted">
-                {{ my_tweet.created_at }}
-                <span><a href="{{ my_tweet.get_absolute_url }}">詳細</a></span>
+                {{ tweet.created_at }}
+                {% if request.user == tweet.user %}
+                    <a href="{% url 'tweets:delete' tweet.pk %}"><button type="button" class="btn btn-danger">削除</button></a>
+                {% endif %}
             </div>
         </div>
         <br>
