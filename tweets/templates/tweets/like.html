@@ -2,7 +2,7 @@
 <button type="button" style="border:none;background:none" class="like-or-unlike-button"
     id="like-for-tweet-{{ tweet.pk }}" data-tweet-pk="{{ tweet.pk }}" data-is-liked="true">
     <span class="btn btn-danger btn-sm rounded-pill" id="ajax-like-icon-{{ tweet.pk }}">いいね</span>
-<button>
+</button>
 {% else %}
     <button type="button" style="border:none;background:none" class="like-or-unlike-button"
         id="like-for-tweet{{ tweet.pk }}" data-tweet-pk="{{ tweet.pk }}" data-is-liked="false">
