@@ -1,8 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Tweet
 from accounts.models import User
+
+from .models import Like, Tweet
 
 
 class TestHomeView(TestCase):
@@ -105,7 +106,7 @@ class TestTweetDetailView(TestCase):
 
 class TestTweetDeleteView(TestCase):
     def setUp(self):
-        self.user1 = User.objects.create_user(
+        self.user = User.objects.create_user(
             username="first_user",
             email="firstemail@email.com",
             password="first_password",
@@ -116,7 +117,7 @@ class TestTweetDeleteView(TestCase):
             password="second_password",
         )
         self.client.login(username="first_user", password="first_password")
-        self.tweet1 = Tweet.objects.create(user=self.user1, content="test_tweet")
+        self.tweet1 = Tweet.objects.create(user=self.user, content="test_tweet")
         self.tweet2 = Tweet.objects.create(user=self.user2, content="test_tweet2")
 
     def test_success_post(self):
@@ -145,22 +146,72 @@ class TestTweetDeleteView(TestCase):
 
 
 class TestFavoriteView(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="first_user",
+            email="firstemail@email.com",
+            password="first_password",
+        )
+        self.user2 = User.objects.create_user(
+            username="second_user",
+            email="secondemail@email.com",
+            password="second_password",
+        )
+        self.client.login(username="first_user", password="first_password")
+        self.tweet = Tweet.objects.create(user=self.user2, content="test_tweet")
+
     def test_success_post(self):
-        pass
+        response = self.client.post(
+            reverse("tweets:like", kwargs={"pk": self.tweet.pk})
+        )
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(Like.objects.filter(tweet=self.tweet, user=self.user).exists())
 
     def test_failure_post_with_not_exist_tweet(self):
-        pass
+        response = self.client.post(reverse("tweets:like", kwargs={"pk": 7274}))
+        self.assertEquals(response.status_code, 404)
+        self.assertFalse(Like.objects.exists())
 
     def test_failure_post_with_favorited_tweet(self):
-        pass
+        Like.objects.create(tweet=self.tweet, user=self.user)
+        response = self.client.post(
+            reverse("tweets:like", kwargs={"pk": self.tweet.pk})
+        )
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(Like.objects.filter(tweet=self.tweet).count(), 1)
 
 
 class TestUnfavoriteView(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="first_user",
+            email="firstemail@email.com",
+            password="first_password",
+        )
+        self.user2 = User.objects.create_user(
+            username="second_user",
+            email="secondemail@email.com",
+            password="second_password",
+        )
+        self.client.login(username="first_user", password="first_password")
+        self.tweet = Tweet.objects.create(user=self.user2, content="test_tweet")
+        Like.objects.create(tweet=self.tweet, user=self.user)
+
     def test_success_post(self):
-        pass
+        response = self.client.post(
+            reverse("tweets:unlike", kwargs={"pk": self.tweet.pk})
+        )
+        self.assertEquals(response.status_code, 200)
+        self.assertFalse(Like.objects.filter(tweet=self.tweet, user=self.user).exists())
 
     def test_failure_post_with_not_exist_tweet(self):
-        pass
+        response = self.client.post(reverse("tweets:unlike", kwargs={"pk": 7274}))
+        self.assertEquals(response.status_code, 404)
+        self.assertTrue(Like.objects.filter(tweet=self.tweet, user=self.user).exists())
 
     def test_failure_post_with_unfavorited_tweet(self):
-        pass
+        self.client.post(reverse("tweets:unlike", kwargs={"pk": self.tweet.pk}))
+        response = self.client.post(
+            reverse("tweets:unlike", kwargs={"pk": self.tweet.pk})
+        )
+        self.assertEquals(response.status_code, 200)
