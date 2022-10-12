@@ -1,0 +1,55 @@
+<script type="text/javascript">
+    const getCookie = name => {
+        if (document.cookie && document.cookie !== '') {
+            for (const cookie of document.cookie.split(';')) {
+                const [key, value] = cookie.trim().split('=');
+                if (key === name) {
+                    return decodeURIComponent(value);
+                    }
+                }
+            }
+        };
+
+    const csrftoken = getCookie('csrftoken');
+
+    const likeLinks = document.getElementsByClassName('like-or-unlike-button');
+    for (const likeLink of likeLinks) {
+        likeLink.addEventListener('click', async (e) => {
+            let url = '';
+            const element = e.currentTarget;
+            if (element.dataset.isLiked == 'true') {
+                url = "{% url 'tweets:unlike' 0 %}".replace("0", element.getAttribute('data-tweet-pk'));
+            } else {
+                url = "{% url 'tweets:like' 0 %}".replace("0", element.getAttribute('data-tweet-pk'));
+            }
+            try {
+                const config = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    }};
+                const response = await fetch(url, config);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+
+                const counter = document.getElementById('ajax-like-count-' + data.tweet_pk);
+                counter.textContent = data.like_counter;
+                const icon = document.getElementById('ajax-like-icon-' + data.tweet_pk);
+                if (element.dataset.isLiked == 'false') {
+                    element.dataset.isLiked = 'true';
+                    icon.classList.replace('btn-outline-danger', 'btn-danger');
+                    icon.id = ('ajax-like-icon-' + data.tweet_pk);
+                } else {
+                    element.dataset.isLiked = 'false';
+                    icon.classList.replace('btn-danger', 'btn-outline-danger');
+                    icon.id = ('ajax-like-icon-' + data.tweet_pk);
+                }
+            } catch (e) {
+                alert(e);
+            }
+        });
+    };
+</script>

@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, View
 
-from tweets.models import Tweet
+from tweets.models import Like, Tweet
 
 from .forms import SignUpForm
 from .models import FriendShip, User
@@ -48,6 +48,9 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         context["connection_exists"] = FriendShip.objects.filter(
             follower=self.request.user, followee=user
         ).exists()
+        context["liked_list"] = Like.objects.filter(user=self.request.user).values_list(
+            "tweet", flat=True
+        )
         return context
 
 

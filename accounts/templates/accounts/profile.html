@@ -47,11 +47,15 @@
             </div>
             <div class="card-footer text-muted">
                 {{ tweet.created_at }}
-                {% if request.user == tweet.user %}
-                    <a href="{% url 'tweets:delete' tweet.pk %}"><button type="button" class="btn btn-danger">削除</button></a>
-                {% endif %}
+                {% include 'tweets/like.html' %}
             </div>
+            {% if request.user == tweet.user %}
+                <a href="{% url 'tweets:delete' tweet.pk %}"><button type="button" class="btn btn-danger">削除</button></a>
+            {% endif %}
         </div>
         <br>
 {% endfor %}
 {% endblock content %}
+{% block extrajs %}
+{% include 'tweets/script.html' %}
+{% endblock extrajs %}

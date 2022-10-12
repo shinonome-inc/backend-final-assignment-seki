@@ -1,0 +1,12 @@
+{% if tweet.pk in liked_list %}
+<button type="button" style="border:none;background:none" class="like-or-unlike-button"
+    id="like-for-tweet-{{ tweet.pk }}" data-tweet-pk="{{ tweet.pk }}" data-is-liked="true">
+    <span class="btn btn-danger btn-sm rounded-pill" id="ajax-like-icon-{{ tweet.pk }}">いいね</span>
+</button>
+{% else %}
+    <button type="button" style="border:none;background:none" class="like-or-unlike-button"
+        id="like-for-tweet{{ tweet.pk }}" data-tweet-pk="{{ tweet.pk }}" data-is-liked="false">
+        <span class="btn btn-outline-danger btn-sm rounded-pill" id="ajax-like-icon-{{ tweet.pk }}">いいね</span>
+    </button>
+{% endif %}
+<b id="ajax-like-count-{{ tweet.pk }}">{{ tweet.like_set.count }}</b>

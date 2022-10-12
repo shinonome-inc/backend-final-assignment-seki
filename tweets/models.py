@@ -14,3 +14,20 @@ class Tweet(models.Model):
 
     def get_absolute_url(self):
         return reverse("tweets:detail", kwargs={"pk": self.pk})
+
+
+class Like(models.Model):
+    tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tweet", "user"],
+                name="like_unique",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} likes {self.tweet}"
