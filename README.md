@@ -1,2 +1,2 @@
 # backend-final-assignment
-Template repository for final assignment of basic backend.
+PlayGroundバックエンドコースの最終課題としての成果物です。
